@@ -12,7 +12,7 @@ from app.dependencies import create_access_token, require_admin
 from app.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=4)
 
 
 @router.post("/login", response_model=TokenResponse)

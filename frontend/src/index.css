@@ -3,77 +3,201 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ==========================================================
+   VitaSage AI — Professional Classic Medical SaaS Design
+   Clean. Readable. Hospital-grade. Tailwind-safe.
+   ========================================================== */
+
 @layer base {
   * {
     box-sizing: border-box;
   }
+
+  html {
+    font-size: 18px;
+    /* Natural large type for medical readability */
+  }
+
   body {
-    @apply bg-slate-950 text-white font-sans antialiased;
+    @apply bg-slate-50 text-slate-800 font-sans antialiased;
     margin: 0;
+  }
+
+  /* Dark mode body */
+  html.dark body {
+    @apply bg-slate-900 text-slate-100;
   }
 }
 
 @layer components {
-  /* Glassmorphism card */
-  .glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+
+  /* ── Medical Card ────────────────────────────────────── */
+  .medical-card {
+    @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6;
   }
 
-  /* Premium input */
-  .glass-input {
-    @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30
-           focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
-           transition-all duration-300;
-  }
-
-  /* Primary button */
-  .btn-primary {
-    @apply w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400
-           text-white font-bold py-3 rounded-xl transition-all duration-300
-           transform hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/30
-           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
-  }
-
-  /* Sidebar nav item */
-  .nav-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white
-           hover:bg-white/10 transition-all duration-200 cursor-pointer font-medium;
-  }
-  .nav-item.active {
-    @apply bg-blue-600/20 text-blue-400 border border-blue-500/20;
-  }
-
-  /* Dashboard stat card */
+  /* Large stat card */
   .stat-card {
-    @apply glass-card rounded-2xl p-6 flex flex-col gap-2 hover:border-white/20 transition-all duration-300;
+    @apply medical-card flex flex-col gap-2;
   }
 
-  /* Badge */
+  /* ── Medical Input ───────────────────────────────────── */
+  .medical-input {
+    @apply w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-3 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all duration-200;
+  }
+
+  /* ── Medical Button — Primary ────────────────────────── */
+  .medical-btn {
+    @apply bg-sky-600 hover:bg-sky-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ── Medical Button — Danger ─────────────────────────── */
+  .medical-btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ── Medical Button — Ghost ──────────────────────────── */
+  .medical-btn-ghost {
+    @apply border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-medium py-3 px-6 rounded-lg transition-colors duration-200;
+  }
+
+  /* ── Sidebar nav items ───────────────────────────────── */
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-150 cursor-pointer font-medium text-sm;
+  }
+
+  .nav-item.active {
+    @apply bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400 border-l-4 border-sky-600 rounded-none rounded-r-lg;
+  }
+
+  /* ── Badges ──────────────────────────────────────────── */
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
-  .badge-admin   { @apply bg-purple-500/20 text-purple-300 border border-purple-500/30; }
-  .badge-doctor  { @apply bg-cyan-500/20 text-cyan-300 border border-cyan-500/30; }
-  .badge-staff   { @apply bg-emerald-500/20 text-emerald-300 border border-emerald-500/30; }
-  .badge-active  { @apply bg-green-500/20 text-green-300 border border-green-500/30; }
-  .badge-inactive{ @apply bg-red-500/20 text-red-300 border border-red-500/30; }
+
+  .badge-blue {
+    @apply bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300;
+  }
+
+  .badge-green {
+    @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300;
+  }
+
+  .badge-red {
+    @apply bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300;
+  }
+
+  .badge-yellow {
+    @apply bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300;
+  }
+
+  .badge-gray {
+    @apply bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400;
+  }
+
+  /* Legacy badge aliases (used in existing dashboards) */
+  .badge-admin {
+    @apply badge bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300;
+  }
+
+  .badge-doctor {
+    @apply badge badge-blue;
+  }
+
+  .badge-staff {
+    @apply badge badge-green;
+  }
+
+  .badge-active {
+    @apply badge badge-green;
+  }
+
+  .badge-inactive {
+    @apply badge badge-red;
+  }
+
+  /* ── Table ───────────────────────────────────────────── */
+  .medical-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .medical-table th {
+    @apply text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide py-3 px-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60;
+  }
+
+  .medical-table td {
+    @apply py-3 px-4 text-slate-700 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700/60;
+  }
+
+  .medical-table tr:hover td {
+    @apply bg-slate-50 dark:bg-slate-700/30;
+  }
+
+  /* ── Section heading ─────────────────────────────────── */
+  .section-title {
+    @apply text-xl font-semibold text-slate-800 dark:text-slate-100;
+  }
+
+  .section-subtitle {
+    @apply text-sm text-slate-500 dark:text-slate-400;
+  }
+
+  /* ── Login card ──────────────────────────────────────── */
+  .login-card {
+    @apply bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-10;
+  }
+
+  /* ── Glass card (kept for dark-mode dashboards fallback) ─ */
+  .glass-card {
+    @apply bg-white/10 dark:bg-slate-800 backdrop-blur-md rounded-xl border border-white/20 dark:border-slate-700;
+  }
+
+  /* ── Legacy — glass-input (maps to medical-input style) ─ */
+  .glass-input {
+    @apply medical-input;
+  }
+
+  /* ── Legacy — btn-primary (maps to medical-btn) ─────── */
+  .btn-primary {
+    @apply w-full medical-btn justify-center;
+  }
 }
 
-/* Animated background orbs */
-.bg-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.15;
-  animation: float 8s ease-in-out infinite;
+/* ── Scrollbar ────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Float animation ──────────────────────────────────── */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}

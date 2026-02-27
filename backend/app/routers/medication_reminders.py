@@ -4,7 +4,7 @@ Patient: set reminder time, mark taken, view stock
 Doctor:  view patient adherence logs + percentage
 """
 import traceback
-from datetime import datetime, date as dt_date
+from datetime import datetime, date as dt_date, time as dt_time
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -45,20 +45,29 @@ async def create_reminder(
 ):
     """Patient creates a reminder for a medicine (linked to an RX or standalone)."""
     try:
+        # Convert reminder_time string 'HH:MM' to Python time object for asyncpg
+        rtime = None
+        if payload.reminder_time:
+            try:
+                parts = payload.reminder_time.split(':')
+                rtime = dt_time(int(parts[0]), int(parts[1]))
+            except Exception:
+                rtime = None
+
         result = await db.execute(text("""
             INSERT INTO medication_reminders
                 (patient_id, patient_source, rx_id, medicine_name,
                  reminder_time, total_stock, remaining_stock)
             VALUES
                 (:pid, :src, :rxid, :mname,
-                 :rtime::time, :stock, :rem)
+                 :rtime, :stock, :rem)
             RETURNING id
         """), {
             "pid":   payload.patient_id,
             "src":   payload.patient_source,
             "rxid":  payload.rx_id,
             "mname": payload.medicine_name,
-            "rtime": payload.reminder_time or None,
+            "rtime": rtime,
             "stock": payload.total_stock,
             "rem":   payload.remaining_stock,
         })
@@ -271,4 +280,32 @@ async def get_adherence(
             r["reminder_time"] = str(r["reminder_time"])[:5]
         if r.get("adherence_pct") is None:
             r["adherence_pct"] = 0
+    return rows
+
+
+# ── GET /meds/patients/all — Doctor: list all patients with reminders ─
+@router.get("/patients/all")
+async def list_patients_with_reminders(
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Returns all distinct patients that have at least one medication reminder.
+    Used by the Doctor Adherence dashboard to build the patient list.
+    Joins registered_patients for portal patients.
+    """
+    result = await db.execute(text("""
+        SELECT DISTINCT
+            r.patient_id   AS id,
+            r.patient_source AS source,
+            COALESCE(rp.name, pm.name, CAST(r.patient_id AS TEXT)) AS name,
+            COALESCE(rp.abha_id, pm.abha_id, '') AS abha_id,
+            COALESCE(rp.blood_group, pm.blood_group, '') AS blood_group
+        FROM medication_reminders r
+        LEFT JOIN registered_patients rp
+            ON rp.id = r.patient_id AND r.patient_source = 'registered'
+        LEFT JOIN patient_master pm
+            ON pm.id = r.patient_id AND r.patient_source = 'master'
+        ORDER BY name ASC
+    """))
+    rows = [dict(r) for r in result.mappings().all()]
     return rows

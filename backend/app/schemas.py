@@ -41,15 +41,15 @@ class HospitalOut(BaseModel):
 # ── User ──────────────────────────────────────────────────
 class UserCreate(BaseModel):
     username: str
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None   # plain str — no email validation so username@vitasage.local works
     password: str
     role: str
     full_name: Optional[str] = None
 
 class UserOut(BaseModel):
-    id: int; username: str; email: Optional[str]
-    role: str; full_name: Optional[str]; status: bool
-    last_login: Optional[datetime]; created_at: datetime
+    id: int; username: str; email: Optional[str] = None
+    role: str; full_name: Optional[str] = None; status: bool
+    last_login: Optional[datetime] = None; created_at: Optional[datetime] = None
     class Config: from_attributes = True
 
 # ── Patient ───────────────────────────────────────────────

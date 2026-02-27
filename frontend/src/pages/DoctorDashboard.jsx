@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -110,7 +110,7 @@ function DiagnosisSection({ patient }) {
         } catch { }
     }, [patient.id, patient.source]);
 
-    useState(() => { loadHistory(); }, []);
+    useEffect(() => { loadHistory(); }, [loadHistory]);
 
     const save = async () => {
         if (!form.diagnosis.trim()) return toast.error('Diagnosis text is required');
@@ -248,7 +248,7 @@ function SuggestionSection({ patientId }) {
             toast.success('Suggestion saved');
         } catch { toast.error('Failed to save'); }
     };
-    useState(() => { load(); }, []);
+    useEffect(() => { load(); }, []);
 
     return (
         <div className="glass-card rounded-2xl p-5 flex flex-col gap-4">
@@ -295,7 +295,7 @@ function PrescriptionSection({ patientId }) {
             toast.success('Prescription added');
         } catch { toast.error('Failed to add prescription'); }
     };
-    useState(() => { load(); }, []);
+    useEffect(() => { load(); }, []);
 
     return (
         <div className="glass-card rounded-2xl p-5 flex flex-col gap-4">
@@ -344,7 +344,7 @@ function ReportSection({ patientId }) {
             toast.success('Report uploaded'); setFile(null); load();
         } catch { toast.error('Upload failed'); }
     };
-    useState(() => { load(); }, []);
+    useEffect(() => { load(); }, []);
     const grouped = CATS.reduce((a, c) => { a[c] = reports.filter(r => r.category === c); return a; }, {});
 
     return (
@@ -407,11 +407,11 @@ function CollaborativeTimeline({ patient, readOnly = false }) {
         finally { setLoading(false); }
     }, [patient]);
 
-    useState(() => { load(); }, []);
+    useEffect(() => { load(); }, [load]);
 
     // Allow external refresh trigger
     const refresh = () => setRefreshKey(k => k + 1);
-    useState(() => { load(); }, [refreshKey]);
+    useEffect(() => { load(); }, [refreshKey, load]);
 
     const filtered = filter === 'all' ? records
         : records.filter(r => r.uploaded_by_role === filter);
@@ -715,7 +715,7 @@ function AdherenceMonitor({ patient }) {
     const [loading, setLoading] = useState(true);
     const [expandedId, setExpandedId] = useState(null);
 
-    const src = patient.patient_source || 'registered';
+    const src = patient.source || 'registered';
 
     useEffect(() => {
         api.get(`/meds/adherence/${src}/${patient.id}`)
@@ -959,7 +959,7 @@ export default function DoctorDashboard() {
     const isRegistered = patient?.source === 'registered';
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
+        <div className="min-h-screen theme-doctor-bg bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
             <Toaster position="top-right" toastOptions={{ style: { background: '#1e293b', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' } }} />
 
             <Header doctor={doctor} today={today} />
@@ -1045,8 +1045,8 @@ function PatientTabs({ patient, isMaster }) {
                 {TABS.map(tab => (
                     <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                         className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${activeTab === tab.id
-                                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/20'
-                                : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70'
+                            ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/20'
+                            : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70'
                             }`}>
                         {tab.label}
                     </button>

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
 from app.database import get_db
-from app.dependencies import require_staff
+from app.dependencies import get_current_user
 
 router = APIRouter(prefix="/lab", tags=["Module 4B - Lab Reports"])
 
@@ -40,9 +40,12 @@ async def upload_lab_report(
     vitamin_d:      Optional[str] = Form(None),
     remarks:        Optional[str] = Form(None),
     file: Optional[UploadFile]    = File(None),
-    current_user=Depends(require_staff),
+    current_user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    if current_user.role not in ("doctor", "staff", "admin"):
+        raise HTTPException(status_code=403, detail="Access denied")
+
     # Build JSONB test_results from filled fields
     local_vars = {
         "hemoglobin": hemoglobin, "wbc": wbc, "platelets": platelets,
