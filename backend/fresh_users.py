@@ -15,38 +15,42 @@ except ImportError:
     print("[ERROR] Run: pip install psycopg2-binary passlib[bcrypt]")
     sys.exit(1)
 
-DB_HOST     = "localhost"
-DB_PORT     = 5432
-DB_NAME     = "vitasage_271527"
-DB_USER     = "postgres"
-DB_PASSWORD = "271527"
+DB_URL = "postgresql://postgres.ahuyxohvyoltzaolnswb:271527akash#@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres"
 
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=4)
 
 print("\nVitaSage AI -- Fresh User Setup")
 print("=" * 55)
 
-conn = psycopg2.connect(host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD)
+conn = psycopg2.connect(DB_URL)
 conn.autocommit = False
 cur  = conn.cursor()
-print("[OK] Connected to database: vitasage_271527")
+print(f"[OK] Connected to live database")
 
 # ── Step 1: Nullify foreign key references before deleting users ──
-# advanced_prescriptions references doctor_id (users.id)
-cur.execute("UPDATE advanced_prescriptions SET doctor_id = NULL WHERE doctor_id IS NOT NULL")
-print(f"[OK] Cleared doctor_id in advanced_prescriptions ({cur.rowcount} rows)")
+try:
+    cur.execute("UPDATE advanced_prescriptions SET doctor_id = NULL WHERE doctor_id IS NOT NULL")
+    print(f"[OK] Cleared doctor_id in advanced_prescriptions ({cur.rowcount} rows)")
+except psycopg2.errors.UndefinedTable:
+    conn.rollback()
 
-# medical_records references uploaded_by (users.id)
-cur.execute("UPDATE medical_records SET uploaded_by = NULL WHERE uploaded_by IS NOT NULL")
-print(f"[OK] Cleared uploaded_by in medical_records ({cur.rowcount} rows)")
+try:
+    cur.execute("UPDATE medical_records SET uploaded_by = NULL WHERE uploaded_by IS NOT NULL")
+    print(f"[OK] Cleared uploaded_by in medical_records ({cur.rowcount} rows)")
+except psycopg2.errors.UndefinedTable:
+    conn.rollback()
 
-# patient_diagnosis_reports references doctor_id
-cur.execute("UPDATE patient_diagnosis_reports SET doctor_id = NULL WHERE doctor_id IS NOT NULL")
-print(f"[OK] Cleared doctor_id in patient_diagnosis_reports ({cur.rowcount} rows)")
+try:
+    cur.execute("UPDATE patient_diagnosis_reports SET doctor_id = NULL WHERE doctor_id IS NOT NULL")
+    print(f"[OK] Cleared doctor_id in patient_diagnosis_reports ({cur.rowcount} rows)")
+except psycopg2.errors.UndefinedTable:
+    conn.rollback()
 
-# lab_reports references staff_id
-cur.execute("UPDATE lab_reports SET staff_id = NULL WHERE staff_id IS NOT NULL")
-print(f"[OK] Cleared staff_id in lab_reports ({cur.rowcount} rows)")
+try:
+    cur.execute("UPDATE lab_reports SET staff_id = NULL WHERE staff_id IS NOT NULL")
+    print(f"[OK] Cleared staff_id in lab_reports ({cur.rowcount} rows)")
+except psycopg2.errors.UndefinedTable:
+    conn.rollback()
 
 # ── Step 1b: Delete ALL existing users ─────────────────────
 cur.execute("DELETE FROM users")
