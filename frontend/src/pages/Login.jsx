@@ -95,11 +95,11 @@ export default function Login() {
 
                     {/* Demo credentials */}
                     <div className="mt-6 p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
-                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-1.5">🔑 Demo Credentials</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mb-1.5">🔑 Demo Credentials (Hospital ID: <span className="font-bold text-sky-600">1</span>)</p>
                         <div className="space-y-0.5 text-xs text-slate-500 dark:text-slate-400">
-                            <p><span className="text-sky-600 dark:text-sky-400 font-medium">Admin:</span> HSP001 / admin / Admin@123</p>
-                            <p><span className="text-sky-600 dark:text-sky-400 font-medium">Doctor:</span> HSP001 / dr.smith / Admin@123</p>
-                            <p><span className="text-emerald-600 dark:text-emerald-400 font-medium">Staff:</span> HSP001 / staff01 / Admin@123</p>
+                            <p><span className="text-sky-600 dark:text-sky-400 font-medium">Admin:</span> Hospital ID: <b>1</b> · User: <b>akash</b> · Pass: <b>271527</b></p>
+                            <p><span className="text-sky-600 dark:text-sky-400 font-medium">Doctor:</span> Hospital ID: <b>101</b> · User: <b>rishie</b> · Pass: <b>271527</b></p>
+                            <p><span className="text-emerald-600 dark:text-emerald-400 font-medium">Staff:</span> Hospital ID: <b>101</b> · User: <b>vairavan</b> · Pass: <b>271527</b></p>
                         </div>
                     </div>
                 </div>

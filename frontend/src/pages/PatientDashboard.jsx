@@ -201,6 +201,29 @@ function MedsSection({ patientId, token }) {
     const [editTime, setEditTime] = useState({});
     const [alerted, setAlerted] = useState({});
 
+    // ── Web Audio API beep alarm ─────────────────────────────────
+    const playAlarm = useCallback(() => {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            // 3 beeps: short high-pitched tones like a medical alert
+            [0, 0.35, 0.70].forEach(offset => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime + offset);          // A5 note
+                osc.frequency.setValueAtTime(1100, ctx.currentTime + offset + 0.08); // up
+                gain.gain.setValueAtTime(0.7, ctx.currentTime + offset);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.28);
+                osc.start(ctx.currentTime + offset);
+                osc.stop(ctx.currentTime + offset + 0.30);
+            });
+        } catch (e) {
+            console.warn('Audio alarm failed:', e);
+        }
+    }, []);
+
     const load = useCallback(() => {
         API.get(`/meds/reminders/registered/${patientId}`, { headers: { Authorization: `Bearer ${token}` } })
             .then(res => { setReminders(res.data); setLoading(false); })
@@ -215,6 +238,8 @@ function MedsSection({ patientId, token }) {
             setReminders(prev => {
                 prev.forEach(r => {
                     if (r.reminder_time && r.reminder_time === hhmm && !alerted[r.id]) {
+                        // 🔊 Play audio alarm
+                        playAlarm();
                         toast(`⏰ Time to take ${r.medicine_name}!`, { icon: '💊', duration: 10000 });
                         if (Notification.permission === 'granted') {
                             new Notification('💊 VitaSage AI Reminder', { body: `Time to take ${r.medicine_name}`, icon: '/favicon.ico' });
@@ -230,7 +255,7 @@ function MedsSection({ patientId, token }) {
             });
         }, 30000);
         return () => clearInterval(interval);
-    }, [patientId, token, alerted, load]);
+    }, [patientId, token, alerted, load, playAlarm]);
 
     const updateTime = async (id) => {
         const t = editTime[id];

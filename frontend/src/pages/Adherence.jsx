@@ -458,7 +458,7 @@ export default function Adherence() {
                         <p className="text-slate-500 dark:text-slate-400 font-medium">No patients found</p>
                         <p className="text-slate-400 text-sm mt-1">
                             {patients.length === 0
-                                ? 'No patients have been seen by this doctor yet. Use the Doctor Dashboard to search and view a patient first.'
+                                ? 'Patients only appear here AFTER you assign them a medication reminder. Go to Doctor Dashboard ➔ Search Patient ➔ Adherence Tab ➔ Add Reminder.'
                                 : 'Try changing the filter or search term.'}
                         </p>
                     </div>

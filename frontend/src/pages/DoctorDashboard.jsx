@@ -714,14 +714,44 @@ function AdherenceMonitor({ patient }) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [expandedId, setExpandedId] = useState(null);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [newReminder, setNewReminder] = useState({ medicine_name: '', total_stock: '30', reminder_time: '' });
 
     const src = patient.source || 'registered';
 
-    useEffect(() => {
+    const loadAdherence = useCallback(() => {
+        setLoading(true);
         api.get(`/meds/adherence/${src}/${patient.id}`)
-            .then(res => { setData(res.data); setLoading(false); })
+            .then(res => { setData(Array.isArray(res.data) ? res.data : []); setLoading(false); })
             .catch(() => setLoading(false));
     }, [patient.id, src]);
+
+    useEffect(() => { loadAdherence(); }, [loadAdherence]);
+
+    const createReminder = async (e) => {
+        e.preventDefault();
+        if (!newReminder.medicine_name.trim()) return;
+        setSaving(true);
+        try {
+            await api.post('/meds/reminder', {
+                patient_id: patient.id,
+                patient_source: src,
+                medicine_name: newReminder.medicine_name.trim(),
+                total_stock: parseInt(newReminder.total_stock) || 30,
+                remaining_stock: parseInt(newReminder.total_stock) || 30,
+                reminder_time: newReminder.reminder_time || null,
+            });
+            toast.success(`✅ Reminder created for ${newReminder.medicine_name}!`);
+            setNewReminder({ medicine_name: '', total_stock: '30', reminder_time: '' });
+            setShowAddForm(false);
+            loadAdherence();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || 'Failed to create reminder');
+        } finally {
+            setSaving(false);
+        }
+    };
 
     if (loading) return (
         <div className="glass-card rounded-3xl p-6">
@@ -744,17 +774,64 @@ function AdherenceMonitor({ patient }) {
                 <h3 className="text-white font-bold text-sm flex items-center gap-2">
                     📊 Medication Adherence Monitor
                 </h3>
-                {overall !== null && (
-                    <span className={`text-lg font-black ${adherenceColor(overall)}`}>
-                        {overall}% overall
-                    </span>
-                )}
+                <div className="flex items-center gap-3">
+                    {overall !== null && (
+                        <span className={`text-lg font-black ${adherenceColor(overall)}`}>
+                            {overall}% overall
+                        </span>
+                    )}
+                    <button onClick={() => setShowAddForm(!showAddForm)}
+                        className="text-xs px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 transition-colors border border-emerald-500/30 font-semibold shadow-sm">
+                        ➕ Add Reminder
+                    </button>
+                </div>
             </div>
+
+            {/* Add Form */}
+            {showAddForm && (
+                <div className="mb-5 p-5 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
+                    <p className="text-xs text-white/50 mb-3 font-semibold uppercase tracking-wide">➕ New Medication Reminder</p>
+                    <form onSubmit={createReminder} className="space-y-3">
+                        <div>
+                            <label className="text-xs text-white/50 mb-1 block">Medicine Name *</label>
+                            <input required value={newReminder.medicine_name}
+                                onChange={e => setNewReminder(r => ({ ...r, medicine_name: e.target.value }))}
+                                placeholder="e.g. Metformin 500mg"
+                                className="glass-input w-full text-sm py-2" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="text-xs text-white/50 mb-1 block">Total Stock (tablets)</label>
+                                <input type="number" min="1" max="999" value={newReminder.total_stock}
+                                    onChange={e => setNewReminder(r => ({ ...r, total_stock: e.target.value }))}
+                                    className="glass-input w-full text-sm py-2" />
+                            </div>
+                            <div>
+                                <label className="text-xs text-white/50 mb-1 block">Default Alarm Time</label>
+                                <input type="time" value={newReminder.reminder_time}
+                                    onChange={e => setNewReminder(r => ({ ...r, reminder_time: e.target.value }))}
+                                    className="glass-input w-full text-sm py-2" style={{ colorScheme: 'dark' }} />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                            <button type="submit" disabled={saving}
+                                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm transition-all disabled:opacity-50">
+                                {saving ? '⏳ Saving...' : '✅ Save Reminder'}
+                            </button>
+                            <button type="button" onClick={() => setShowAddForm(false)}
+                                className="px-5 py-2.5 text-sm text-white/50 hover:text-white bg-white/5 rounded-xl transition-colors border border-white/10">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
 
             {data.length === 0 ? (
                 <div className="text-center py-8">
                     <div className="text-3xl mb-2">📊</div>
-                    <p className="text-white/30 text-xs">No medication reminders set for this patient yet.</p>
+                    <p className="text-white/30 text-xs mt-2 font-medium">No medication reminders set for this patient yet.</p>
+                    <p className="text-white/20 text-[10px] mt-1">Click the 'Add Reminder' button above to create the first one.</p>
                 </div>
             ) : (
                 <div className="space-y-3">
