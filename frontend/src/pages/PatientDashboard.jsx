@@ -259,12 +259,19 @@ function MedsSection({ patientId, token }) {
 
     const updateTime = async (id) => {
         const t = editTime[id];
-        if (!t) return;
+        if (!t) { toast.error('Please select a time first'); return; }
         try {
-            await API.put(`/meds/reminder/${id}/time`, { reminder_time: t }, { headers: { Authorization: `Bearer ${token}` } });
-            toast.success('Alarm time updated 🔔');
+            await API.put(
+                `/meds/reminder/${id}/time`,
+                { reminder_time: t },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success('⏰ Alarm time saved!');
             load();
-        } catch { toast.error('Could not update time'); }
+        } catch (err) {
+            console.error('Update time error:', err.response?.data);
+            toast.error('Could not update time — please try again');
+        }
     };
 
     const markTaken = async (r) => {

@@ -4,9 +4,9 @@ import api from '../api/axios';
 import toast, { Toaster } from 'react-hot-toast';
 
 const StatCard = ({ icon, label, value, color }) => (
-    <div className="stat-card">
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5 flex flex-col gap-1 hover:bg-white/10 transition-all">
         <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center text-xl mb-2`}>{icon}</div>
-        <p className="text-white/40 text-sm">{label}</p>
+        <p className="text-white/50 text-sm">{label}</p>
         <p className="text-white text-2xl font-bold">{value}</p>
     </div>
 );

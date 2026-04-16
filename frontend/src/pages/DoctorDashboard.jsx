@@ -1002,27 +1002,17 @@ function DoctorMedicalRecord({ patient }) {
     );
 }
 
-// ── Main Doctor Dashboard ─────────────────────────────────
-export default function DoctorDashboard() {
-    const { user } = useAuth();
-    const navigate = useNavigate();
+// ── Main Doctor Dashboard ─────────────────────────
+function DoctorSearch() {
     const [query, setQuery] = useState('');
     const [patient, setPatient] = useState(null);
     const [searching, setSearching] = useState(false);
-    const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-
-    // Derive a doctor object immediately from localStorage as fallback
-    const cachedUser = (() => {
-        try { return JSON.parse(localStorage.getItem('user') || 'null'); } catch { return null; }
-    })();
-    const doctor = user || cachedUser;
 
     const searchPatient = async () => {
         if (query.length !== 12 || !/^\d{12}$/.test(query))
             return toast.error('Must be a 12-digit ABHA ID or Aadhaar number');
         setSearching(true);
         try {
-            // Unified search: checks registered_patients + patient_master
             const res = await api.get(`/patient-records/search?query=${query}`);
             setPatient(res.data);
             toast.success(`Patient found: ${res.data.name}`);
@@ -1033,37 +1023,30 @@ export default function DoctorDashboard() {
     };
 
     const isMaster = patient?.source === 'master';
-    const isRegistered = patient?.source === 'registered';
 
     return (
-        <div className="min-h-screen theme-doctor-bg bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950">
-            <Toaster position="top-right" toastOptions={{ style: { background: '#1e293b', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' } }} />
-
-            <Header doctor={doctor} today={today} />
-
+        <div className="space-y-6">
             {/* Search */}
-            <div className="mx-8 mt-6">
-                <div className="glass-card rounded-2xl p-6">
-                    <h2 className="text-white font-bold text-lg mb-1 flex items-center gap-2">🔎 Patient Search</h2>
-                    <p className="text-white/30 text-xs mb-4">
-                        Searches both <span className="text-cyan-400/60">Doctor-managed records</span> and <span className="text-emerald-400/60">Patient Portal registrations</span>
-                    </p>
-                    <div className="flex gap-3">
-                        <div className="relative flex-1">
-                            <input value={query}
-                                onChange={e => setQuery(e.target.value.replace(/\D/g, '').slice(0, 12))}
-                                onKeyDown={e => e.key === 'Enter' && searchPatient()}
-                                className="glass-input pr-16"
-                                placeholder="Enter 12-digit ABHA ID or Aadhaar number" />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 text-xs">{query.length}/12</span>
-                        </div>
-                        <button onClick={searchPatient} disabled={searching}
-                            className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl text-white font-bold text-sm transition-all disabled:opacity-50">
-                            {searching ? '⏳' : '🔍 Fetch Patient'}
-                        </button>
+            <div className="glass-card rounded-2xl p-6">
+                <h2 className="text-white font-bold text-lg mb-1 flex items-center gap-2">🔎 Patient Search</h2>
+                <p className="text-white/30 text-xs mb-4">
+                    Searches both <span className="text-cyan-400/60">Doctor-managed records</span> and <span className="text-emerald-400/60">Patient Portal registrations</span>
+                </p>
+                <div className="flex gap-3">
+                    <div className="relative flex-1">
+                        <input value={query}
+                            onChange={e => setQuery(e.target.value.replace(/\D/g, '').slice(0, 12))}
+                            onKeyDown={e => e.key === 'Enter' && searchPatient()}
+                            className="glass-input pr-16"
+                            placeholder="Enter 12-digit ABHA ID or Aadhaar number" />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 text-xs">{query.length}/12</span>
                     </div>
-                    <p className="text-white/15 text-xs mt-2">Demo ABHA ID: 123456789000 (doctor-managed) · any registered patient ABHA</p>
+                    <button onClick={searchPatient} disabled={searching}
+                        className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl text-white font-bold text-sm transition-all disabled:opacity-50">
+                        {searching ? '⏳' : '🔍 Fetch Patient'}
+                    </button>
                 </div>
+                <p className="text-white/15 text-xs mt-2">Demo ABHA ID: 123456789000 (doctor-managed) · any registered patient ABHA</p>
             </div>
 
             {/* Patient found */}
@@ -1071,14 +1054,12 @@ export default function DoctorDashboard() {
                 <>
                     {isMaster && patient.risk_level === 'High' && <EmergencyBanner patientName={patient.name} />}
                     <PatientCard patient={patient} />
-
-                    {/* ── Tab nav ──────────────────────────── */}
                     <PatientTabs patient={patient} isMaster={isMaster} />
                 </>
             )}
 
             {!patient && (
-                <div className="mx-8 mt-6 glass-card rounded-2xl p-12 text-center">
+                <div className="glass-card rounded-2xl p-12 text-center">
                     <div className="text-5xl mb-4">🩺</div>
                     <h3 className="text-white font-bold text-xl mb-2">Doctor Portal Ready</h3>
                     <p className="text-white/30 mb-6">Search any patient by ABHA ID or Aadhaar — from hospital records or patient portal.</p>
@@ -1100,6 +1081,10 @@ export default function DoctorDashboard() {
             )}
         </div>
     );
+}
+
+export default function DoctorDashboard() {
+    return <DoctorSearch />;
 }
 
 // ── Tabbed Patient Sections (lazy — only active tab mounts) ──

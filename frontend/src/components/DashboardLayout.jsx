@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { useAuth } from '../contexts/AuthContext';
+import { Toaster } from 'react-hot-toast';
 
 // Map route paths to human-readable page titles
 const PAGE_TITLES = {
@@ -27,9 +28,11 @@ export default function DashboardLayout() {
     const location = useLocation();
     const title = getTitle(location.pathname);
 
-    // Admin uses dark glass theme, doctor/staff use light
+    // Admin and Doctor use dark glass theme, staff uses light
     const isAdmin = user?.role === 'admin';
-    const bg = isAdmin
+    const isDoctor = user?.role === 'doctor';
+    const forceDark = isAdmin || isDoctor;
+    const bg = forceDark
         ? 'bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950'
         : 'bg-slate-50 dark:bg-slate-900';
     const sidebarBg = isAdmin
@@ -38,12 +41,13 @@ export default function DashboardLayout() {
 
     return (
         <div className={`flex h-screen overflow-hidden ${bg}`}>
+            <Toaster position="top-right" toastOptions={{ style: forceDark ? { background: '#1e293b', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' } : {} }} />
             {/* Sidebar — fixed height, sticky */}
-            <Sidebar role={user?.role} forceDark={isAdmin} />
+            <Sidebar role={user?.role} forceDark={forceDark} />
 
             {/* Right panel — scrollable */}
             <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-                <Topbar title={title} forceDark={isAdmin} />
+                <Topbar title={title} forceDark={forceDark} />
                 <main className="flex-1 p-6 space-y-6">
                     <Outlet />
                 </main>
